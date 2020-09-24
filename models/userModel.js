@@ -1,0 +1,87 @@
+const mongoose = require('mongoose');
+const validator = require('validator');
+const bcrypt = require('bcryptjs');
+
+const userSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        unique: true,
+        trim: true,
+        maxLengt: [20, 'A user name cannot have more than 20 characters'],
+        minLengt: [20, 'A user name cannot have less than 4 characters'],
+        required: [true, 'Please index an user name'],
+    },
+    email: {
+        type: String,
+        unique: true,
+        required: [true, 'Please add your email'],
+        lowercase: true,
+        validate: [validator.isEmail, 'Please provide a valid email'],
+    },
+    photo: {
+        type: String,
+        default: './',
+    },
+    role: {
+        type: String,
+        enum: {
+            values: ['user', 'guide', 'lead-guide', 'admin'],
+            message: ['please provide a valid role'],
+        },
+        default: 'user',
+    },
+    password: {
+        type: String,
+        required: [true, 'Please provide a password'],
+        minLengt: [6, 'A password cannot have less than 6 characters'],
+        select: false,
+    },
+    passwordConfirm: {
+        type: String,
+        required: [true, 'Please provide a password'],
+        minLengt: [6, 'A password cannot have less than 6 characters'],
+        validate: {
+            //this only workds on create and save, NOT on update
+            validator: function (el) {
+                return el === this.password;
+            },
+            message: 'passwords are not the same',
+        },
+    },
+    lastPasswordChangedAt: Date,
+});
+
+userSchema.pre('save', async function (next) {
+    //only run when passwrod is modified
+    if (!this.isModified('password')) return next();
+
+    //hash password with salt = 12
+    this.password = await bcrypt.hash(this.password, 12);
+    this.passwordConfirm = undefined;
+    next();
+});
+
+userSchema.methods.correctPassword = async function (
+    candidatePassword,
+    userPassword
+) {
+    return await bcrypt.compare(candidatePassword, userPassword);
+};
+
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+    if (this.lastPasswordChangedAt) {
+        const changedTimeStamp = parseInt(
+            this.lastPasswordChangedAt.getTime() / 1000,
+            10
+        );
+        console.log(changedTimeStamp, JWTTimestamp);
+
+        return JWTTimestamp < changedTimeStamp;
+    }
+
+    return false;
+};
+
+const User = mongoose.model('User', userSchema);
+
+module.exports = User;
