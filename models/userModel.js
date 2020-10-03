@@ -64,6 +64,17 @@ userSchema.pre('save', async function (next) {
     next();
 });
 
+userSchema.pre('save', function (next) {
+    if (!this.isModified('password') || this.isNew) return next();
+
+    //minus 1 second because the token password will likely be modified
+    //after the token is signed. this is a "small hack" so the user can
+    //log in after changing password
+    this.lastPasswordChangedAt = Date.now() - 1000;
+
+    next();
+});
+
 userSchema.methods.correctPassword = async function (
     candidatePassword,
     userPassword
