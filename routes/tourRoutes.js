@@ -7,7 +7,7 @@ const router = express.Router();
 
 // router.param('id', tourController.checkId);
 
-router.use('/:tourId/review', `reviewRouter`);
+router.use('/:tourId/review', reviewRouter);
 
 router
     .route('/top-5-cheap')
