@@ -24,18 +24,6 @@ router
     .route('/:id')
     .get(tourController.getTour)
     .patch(tourController.updateTour)
-    .delete(
-        authController.protect,
-        authController.restrictTo('admin', 'lead-guide'),
-        tourController.deleteTour
-    );
-
-// router
-//     .route('/:tourId/review')
-//     .post(
-//         authController.protect,
-//         authController.restrictTo('user'),
-//         reviewController.createReview
-//     );
+    .delete(tourController.deleteTour);
 
 module.exports = router;
