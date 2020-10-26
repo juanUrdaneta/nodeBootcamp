@@ -1,7 +1,5 @@
 const Tour = require('../models/tourModel');
 const catchAsync = require('../utils/catchAsync');
-const APIFeatures = require('../utils/APIFeatures');
-// const AppError = require('../utils/appErrors');
 const Factory = require('./handlerFactory');
 const AppError = require('../utils/appErrors');
 
@@ -114,7 +112,7 @@ exports.getToursWithin = catchAsync(async (req, res, next) => {
 });
 
 exports.getDistance = catchAsync(async (req, res, next) => {
-    const { latlng, unit } = req.params;
+    const { latlng } = req.params;
     const [lat, lng] = latlng.split(',');
 
     if (!lat || !lng) {
