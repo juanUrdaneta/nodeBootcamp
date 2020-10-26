@@ -15,7 +15,6 @@ exports.getAllUsers = Factory.getAll(User);
 exports.getUser = Factory.getOne(User);
 exports.updateUser = Factory.updateOne(User);
 exports.deleteUser = Factory.deleteOne(User);
-
 exports.updateMe = catchAsync(async (req, res, next) => {
     if (req.body.password || req.body.passwordConfirm) {
         return next(
