@@ -43,6 +43,7 @@ const tourSchema = new mongoose.Schema(
             //validators
             min: [1, 'Rating must be above 0'],
             max: [5, 'Rating must be below 5'],
+            set: (val) => Math.round(val * 10) / 10, // rounds avg to 1 dec
         },
         ratingsQuantity: {
             type: Number,
@@ -121,6 +122,11 @@ const tourSchema = new mongoose.Schema(
     }
 );
 
+// tourSchema.index({ price: 1 }); //will create an internal index for querying prices
+tourSchema.index({ price: 1, ratingsAverage: -1 }); //will create an internal index for querying prices and ratings
+tourSchema.index({ slug: 1 });
+tourSchema.index({ startLocation: '2dsphere' }); //is for 2d geospecial points in a sphere
+
 tourSchema.virtual('durationWeeks').get(function () {
     return this.duration / 7 || 0;
 });
@@ -164,10 +170,10 @@ tourSchema.post(/^find/, function (docs, next) {
 });
 
 //AGGREGATION MIDDLEWARE
-tourSchema.pre('aggregate', function (next) {
-    this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
-    next();
-});
+// tourSchema.pre('aggregate', function (next) {
+//     this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+//     next();
+// });
 
 const Tour = mongoose.model('Tour', tourSchema);
 
