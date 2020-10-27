@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Tour = require('./tourModel');
+const AppError = require('../utils/appErrors');
 
 //review / rating / createdAt / ref to Tour / ref to user;
 
@@ -95,6 +96,9 @@ reviewSchema.post('save', function (next) {
 //this.rev will be strapped into the 'this' document so it can be used in the next 'post' middleware.
 reviewSchema.pre(/^findOneAnd/, async function (next) {
     this.rev = await this.findOne(); //gets access for the query'ed review
+    if (this.rev === null) {
+        next(new AppError('No tour found with that ID', 400));
+    }
     next();
 });
 reviewSchema.post(/^findOneAnd/, async function () {
