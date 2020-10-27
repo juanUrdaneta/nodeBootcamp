@@ -97,9 +97,9 @@ reviewSchema.pre(/^findOneAnd/, async function (next) {
     this.rev = await this.findOne(); //gets access for the query'ed review
     next();
 });
-reviewSchema.post('save', async function () {
+reviewSchema.post(/^findOneAnd/, async function () {
     //this.findOne does not work here, query already executed.
-    await this.r.constructor.calcAverageRating(this.r.tour);
+    await this.rev.constructor.calcAverageRating(this.rev.tour);
 });
 
 const Review = mongoose.model('Review', reviewSchema);
